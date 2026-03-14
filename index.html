@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pavas Order - Система замовлень</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .total-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 180px;
+        }
+        
+        .total-counter .label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .total-counter .amount {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .order-completed {
+            opacity: 0.7;
+            border-left-color: #4CAF50 !important;
+        }
+        
+        .completed-badge {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .task-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #FF9800;
+        }
+        
+        .task-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .task-details {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .task-completed {
+            opacity: 0.7;
+            border-left-color: #4CAF50 !important;
+        }
+        
+        .task-in-progress {
+            border-left-color: #2196F3 !important;
+        }
+        
+        .btn-add-task {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-add-task:hover {
+            background-color: #45a049;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-add:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-list {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-list:hover {
+            background-color: #1976D2;
+        }
+        
+        .btn-tasks {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .btn-tasks:hover {
+            background-color: #F57C00;
+        }
+        
+        .section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .btn-save {
+            background-color: #FF9800;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+        }
+        
+        .btn-save:hover {
+            background-color: #F57C00;
+        }
+        
+        .order-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .order-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .order-details {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .no-orders {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .btn-details {
+            background-color: #9C27B0;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        
+        .btn-details:hover {
+            background-color: #7B1FA2;
+        }
+        
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .btn-delete:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn-back {
+            background-color: #607D8B;
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-back:hover {
+            background-color: #455A64;
+        }
+        
+        .btn-update {
+            background-color: #4CAF50;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+        }
+        
+        .btn-update:hover {
+            background-color: #45a049;
+        }
+        
+        .detail-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .order-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-замовлено { background-color: #FFE0B2; color: #E65100; }
+        .status-в-роботі { background-color: #BBDEFB; color: #0D47A1; }
+        .status-виконано { background-color: #C8E6C9; color: #1B5E20; }
+        .status-записано { background-color: #FFF3E0; color: #E65100; }
+        
+        .positions-section {
+            margin-top: 30px;
+            border-top: 2px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .position-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .position-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .position-number {
+            font-weight: bold;
+            color: #2196F3;
+        }
+        
+        .btn-remove {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .btn-remove:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn-add-position {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .btn-add-position:hover {
+            background-color: #45a049;
+        }
+        
+        .position-form {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .position-total {
+            text-align: right;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-top: 10px;
+        }
+        
+        .order-total {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="total-counter" id="totalCounter">
+            <div class="label">💰 Неопрацьовані замовлення</div>
+            <div class="amount" id="totalAmount">0.00 грн</div>
+        </div>
+        
+        <h1>🛍️ Pavas Order</h1>
+        
+        <div class="buttons">
+            <button class="btn-add" onclick="showAddOrder()">Додати ордер</button>
+            <button class="btn-list" onclick="showOrdersList()">Неопрацьовані замовлення</button>
+            <button class="btn-tasks" onclick="showTasksList()">Завдання</button>
+        </div>
+        
+        <!-- Секція додавання замовлення -->
+        <div id="addOrderSection" class="section">
+            <h2>Додати нове замовлення</h2>
+            <div id="successMessage" class="success-message">
+                Замовлення успішно збережено!
+            </div>
+            
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="customerName">Ім'я замовника:</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customerContact">Контакти замовника:</label>
+                    <input type="text" id="customerContact" placeholder="Телефон, email або інші контакти" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orderDetails">Замовлення:</label>
+                    <textarea id="orderDetails" placeholder="Опишіть деталі замовлення..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-save">Зберегти замовлення</button>
+            </form>
+        </div>
+        
+        <!-- Секція списку замовлень -->
+        <div id="ordersListSection" class="section">
+            <h2>Неопрацьовані замовлення</h2>
+            <div id="ordersList"></div>
+        </div>
+        
+        <!-- Секція детального перегляду замовлення -->
+        <div id="orderDetailSection" class="section">
+            <button class="btn-back" onclick="showOrdersList()">← Назад до списку</button>
+            <h2>Деталі замовлення</h2>
+            <div id="orderDetailContent"></div>
+        </div>
+        
+        <!-- Секція завдань -->
+        <div id="tasksListSection" class="section">
+            <h2>Завдання</h2>
+            <button class="btn-add-task" onclick="showAddTask()">➕ Додати завдання</button>
+            <div id="tasksList"></div>
+        </div>
+        
+        <!-- Секція додавання завдання -->
+        <div id="addTaskSection" class="section">
+            <button class="btn-back" onclick="showTasksList()">← Назад до завдань</button>
+            <h2>Додати нове завдання</h2>
+            <div id="taskSuccessMessage" class="success-message">
+                Завдання успішно збережено!
+            </div>
+            
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="taskName">Назва завдання:</label>
+                    <input type="text" id="taskName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskDescription">Опис завдання:</label>
+                    <textarea id="taskDescription" placeholder="Опишіть деталі завдання..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskStatus">Статус:</label>
+                    <select id="taskStatus" required>
+                        <option value="записано">Записано</option>
+                        <option value="в роботі">В роботі</option>
+                        <option value="виконано">Виконано</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-save">Зберегти завдання</button>
+            </form>
+        </div>
+        
+        <!-- Секція детального перегляду завдання -->
+        <div id="taskDetailSection" class="section">
+            <button class="btn-back" onclick="showTasksList()">← Назад до завдань</button>
+            <h2>Деталі завдання</h2>
+            <div id="taskDetailContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Функції для показу секцій
+        function showAddOrder() {
+            hideAllSections();
+            document.getElementById('addOrderSection').classList.add('active');
+        }
+        
+        function showOrdersList() {
+            hideAllSections();
+            document.getElementById('ordersListSection').classList.add('active');
+            loadOrders();
+        }
+        
+        function showOrderDetail(orderId) {
+            hideAllSections();
+            document.getElementById('orderDetailSection').classList.add('active');
+            loadOrderDetail(orderId);
+        }
+        
+        function showTasksList() {
+            hideAllSections();
+            document.getElementById('tasksListSection').classList.add('active');
+            loadTasks();
+        }
+        
+        function showAddTask() {
+            hideAllSections();
+            document.getElementById('addTaskSection').classList.add('active');
+        }
+        
+        function showTaskDetail(taskId) {
+            hideAllSections();
+            document.getElementById('taskDetailSection').classList.add('active');
+            loadTaskDetail(taskId);
+        }
+        
+        function hideAllSections() {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+        }
+        
+        // Збереження замовлення
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const customerName = document.getElementById('customerName').value;
+            const customerContact = document.getElementById('customerContact').value;
+            const orderDetails = document.getElementById('orderDetails').value;
+            
+            // Створюємо об'єкт замовлення
+            const order = {
+                id: Date.now(),
+                customerName: customerName,
+                customerContact: customerContact,
+                orderDetails: orderDetails,
+                date: new Date().toLocaleString('uk-UA'),
+                status: 'замовлено',
+                supplier: '',
+                deliveryDate: '',
+                amount: '',
+                positions: []
+            };
+            
+            // Отримуємо існуючі замовлення з localStorage
+            let orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+            
+            // Додаємо нове замовлення
+            orders.push(order);
+            
+            // Зберігаємо в localStorage
+            localStorage.setItem('pavasOrders', JSON.stringify(orders));
+            
+            // Оновлюємо лічильник
+            updateTotalCounter();
+            
+            // Показуємо повідомлення про успіх
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Очищуємо форму
+            document.getElementById('orderForm').reset();
+            
+            // Ховаємо повідомлення через 3 секунди
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+        });
+        
+        // Збереження завдання
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const taskName = document.getElementById('taskName').value;
+            const taskDescription = document.getElementById('taskDescription').value;
+            const taskStatus = document.getElementById('taskStatus').value;
+            
+            // Створюємо об'єкт завдання
+            const task = {
+                id: Date.now(),
+                name: taskName,
+                description: taskDescription,
+                status: taskStatus,
+                date: new Date().toLocaleString('uk-UA')
+            };
+            
+            // Отримуємо існуючі завдання з localStorage
+            let tasks = JSON.parse(localStorage.getItem('pavasTasks')) || [];
+            
+            // Додаємо нове завдання
+            tasks.push(task);
+            
+            // Зберігаємо в localStorage
+            localStorage.setItem('pavasTasks', JSON.stringify(tasks));
+            
+            // Показуємо повідомлення про успіх
+            document.getElementById('taskSuccessMessage').style.display = 'block';
+            
+            // Очищуємо форму
+            document.getElementById('taskForm').reset();
+            
+            // Ховаємо повідомлення через 3 секунди
+            setTimeout(() => {
+                document.getElementById('taskSuccessMessage').style.display = 'none';
+            }, 3000);
+        });
+        
+        // Завантаження та відображення замовлень
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+            const ordersList = document.getElementById('ordersList');
+            
+            // Оновлюємо лічильник загальної суми
+            updateTotalCounter();
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<div class="no-orders">Немає замовлень</div>';
+                return;
+            }
+            
+            // Сортуємо замовлення за датою (найновіші спочатку)
+            orders.sort((a, b) => b.id - a.id);
+            
+            let html = '';
+            orders.forEach(order => {
+                const statusClass = `status-${order.status.replace(' ', '-')}`;
+                const isCompleted = order.status === 'виконано';
+                const orderClass = isCompleted ? 'order-item order-completed' : 'order-item';
+                
+                // Рахуємо суму замовлення
+                let orderSum = 0;
+                if (order.positions && order.positions.length > 0) {
+                    orderSum = order.positions.reduce((sum, position) => {
+                        return sum + (position.quantity * position.price);
+                    }, 0);
+                } else if (order.amount) {
+                    orderSum = parseFloat(order.amount);
+                }
+                
+                const completedBadge = isCompleted && orderSum > 0 ? 
+                    `<span class="completed-badge">+${orderSum.toFixed(2)} грн</span>` : '';
+                
+                html += `
+                    <div class="${orderClass}">
+                        <div class="order-header">
+                            👤 ${order.customerName} | 📞 ${order.customerContact || 'Не вказано'} | 📅 ${order.date}
+                            ${completedBadge}
+                        </div>
+                        <div class="order-details">
+                            <strong>Замовлення:</strong> ${order.orderDetails}
+                        </div>
+                        <div class="order-details">
+                            <strong>Статус:</strong> <span class="order-status ${statusClass}">${order.status}</span>
+                        </div>
+                        <button class="btn-details" onclick="showOrderDetail(${order.id})">Докладніше</button>
+                        <button class="btn-delete" onclick="deleteOrder(${order.id})">Видалити</button>
+                    </div>
+                `;
+            });
+            
+            ordersList.innerHTML = html;
+        }
+        
+        // Показуємо секцію додавання замовлення за замовчуванням
+        showAddOrder();
+        
+        // Оновлення лічильника загальної суми
+        function updateTotalCounter() {
+            const orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+            let totalSum = 0;
+            
+            // Рахуємо тільки неопрацьовані замовлення (не "виконано")
+            orders.forEach(order => {
+                if (order.status !== 'виконано') {
+                    if (order.positions && order.positions.length > 0) {
+                        const orderSum = order.positions.reduce((sum, position) => {
+                            return sum + (position.quantity * position.price);
+                        }, 0);
+                        totalSum += orderSum;
+                    } else if (order.amount) {
+                        totalSum += parseFloat(order.amount);
+                    }
+                }
+            });
+            
+            document.getElementById('totalAmount').textContent = totalSum.toFixed(2) + ' грн';
+        }
+        
+        // Оновлюємо лічильник при завантаженні сторінки
+        updateTotalCounter();
+        
+        // Завантаження та відображення деталей замовлення
+        function loadOrderDetail(orderId) {
+            const orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+            const order = orders.find(o => o.id == orderId);
+            
+            if (!order) {
+                document.getElementById('orderDetailContent').innerHTML = '<div class="no-orders">Замовлення не знайдено</div>';
+                return;
+            }
+            
+            const html = `
+                <div class="order-item">
+                    <div class="order-header">
+                        👤 ${order.customerName} | 📞 ${order.customerContact || 'Не вказано'} | 📅 ${order.date}
+                    </div>
+                    <div class="order-details">
+                        <strong>Замовлення:</strong> ${order.orderDetails}
+                    </div>
+                </div>
+                
+                <div class="detail-form">
+                    <h3>Редагування замовлення</h3>
+                    <form id="updateOrderForm">
+                        <input type="hidden" id="orderId" value="${order.id}">
+                        
+                        <div class="form-group">
+                            <label for="orderStatus">Статус:</label>
+                            <select id="orderStatus" required>
+                                <option value="замовлено" ${order.status === 'замовлено' ? 'selected' : ''}>Замовлено</option>
+                                <option value="в роботі" ${order.status === 'в роботі' ? 'selected' : ''}>В роботі</option>
+                                <option value="виконано" ${order.status === 'виконано' ? 'selected' : ''}>Виконано</option>
+                            </select>
+                        </div>
+                        
+                        <div class="positions-section">
+                            <h3>📎 Позиції товару</h3>
+                            <button type="button" class="btn-add-position" onclick="addPosition()">➕ Додати позицію</button>
+                            <div id="positionsList"></div>
+                            <div class="order-total" id="orderTotal">
+                                Загальна сума: 0.00 грн
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-update">Оновити замовлення</button>
+                    </form>
+                </div>
+            `;
+            
+            document.getElementById('orderDetailContent').innerHTML = html;
+            
+            // Додаємо обробник для форми оновлення
+            document.getElementById('updateOrderForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateOrder();
+            });
+            
+            // Завантажуємо позиції
+            loadPositions(order.id);
+        }
+        
+        // Глобальна змінна для позицій
+        let currentPositions = [];
+        
+        // Завантаження позицій
+        function loadPositions(orderId) {
+            const orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+            const order = orders.find(o => o.id == orderId);
+            currentPositions = order.positions || [];
+            renderPositions();
+        }
+        
+        // Відображення позицій
+        function renderPositions() {
+            const positionsList = document.getElementById('positionsList');
+            
+            if (currentPositions.length === 0) {
+                positionsList.innerHTML = '<div class="no-orders">Немає позицій</div>';
+                updateOrderTotal();
+                return;
+            }
+            
+            let html = '';
+            currentPositions.forEach((position, index) => {
+                const total = (position.quantity * position.price).toFixed(2);
+                html += `
+                    <div class="position-item">
+                        <button type="button" class="btn-remove" onclick="removePosition(${index})">✖</button>
+                        <div class="position-header">
+                            <span class="position-number">Позиція ${index + 1}</span>
+                        </div>
+                        <div class="position-form">
+                            <div class="form-group">
+                                <label>Артикул:</label>
+                                <input type="text" value="${position.article}" onchange="updatePosition(${index}, 'article', this.value)" placeholder="Артикул">
+                            </div>
+                            <div class="form-group">
+                                <label>Назва:</label>
+                                <input type="text" value="${position.name}" onchange="updatePosition(${index}, 'name', this.value)" placeholder="Назва товару">
+                            </div>
+                            <div class="form-group">
+                                <label>Кількість:</label>
+                                <input type="number" value="${position.quantity}" onchange="updatePosition(${index}, 'quantity', this.value)" placeholder="Кількість" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Ціна:</label>
+                                <input type="number" value="${position.price}" onchange="updatePosition(${index}, 'price', this.value)" placeholder="Ціна" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Постачальник:</label>
+                                <input type="text" value="${position.supplier || ''}" onchange="updatePosition(${index}, 'supplier', this.value)" placeholder="Постачальник">
+                            </div>
+                            <div class="form-group">
+                                <label>Дата поставки:</label>
+                                <input type="date" value="${position.deliveryDate || ''}" onchange="updatePosition(${index}, 'deliveryDate', this.value)">
+                            </div>
+                        </div>
+                        <div class="position-total">
+                            Сума: ${total} грн
+                        </div>
+                    </div>
+                `;
+            });
+            
+            positionsList.innerHTML = html;
+            updateOrderTotal();
+        }
+        
+        // Додавання нової позиції
+        function addPosition() {
+            const newPosition = {
+                article: '',
+                name: '',
+                quantity: 1,
+                price: 0,
+                supplier: '',
+                deliveryDate: ''
+            };
+            currentPositions.push(newPosition);
+            renderPositions();
+        }
+        
+        // Оновлення позиції
+        function updatePosition(index, field, value) {
+            if (currentPositions[index]) {
+                currentPositions[index][field] = value;
+                renderPositions();
+            }
+        }
+        
+        // Видалення позиції
+        function removePosition(index) {
+            if (confirm('Ви впевнені, що хочете видалити цю позицію?')) {
+                currentPositions.splice(index, 1);
+                renderPositions();
+            }
+        }
+        
+        // Оновлення загальної суми
+        function updateOrderTotal() {
+            const total = currentPositions.reduce((sum, position) => {
+                return sum + (position.quantity * position.price);
+            }, 0);
+            
+            document.getElementById('orderTotal').innerHTML = `Загальна сума: ${total.toFixed(2)} грн`;
+        }
+        
+        // Оновлення замовлення
+        function updateOrder() {
+            const orderId = document.getElementById('orderId').value;
+            const status = document.getElementById('orderStatus').value;
+            
+            let orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            
+            if (orderIndex !== -1) {
+                orders[orderIndex].status = status;
+                orders[orderIndex].positions = currentPositions;
+                orders[orderIndex].updatedDate = new Date().toLocaleString('uk-UA');
+                
+                // Автоматично рахуємо суму з позицій
+                const totalAmount = currentPositions.reduce((sum, position) => {
+                    return sum + (position.quantity * position.price);
+                }, 0);
+                orders[orderIndex].amount = totalAmount.toFixed(2);
+                
+                localStorage.setItem('pavasOrders', JSON.stringify(orders));
+                
+                // Оновлюємо лічильник
+                updateTotalCounter();
+                
+                // Показуємо повідомлення про успіх
+                alert('Замовлення успішно оновлено!');
+                
+                // Оновлюємо лічильник після зміни статусу
+                updateTotalCounter();
+                
+                // Перезавантажуємо деталі
+                loadOrderDetail(orderId);
+            }
+        }
+        
+        // Видалення замовлення
+        function deleteOrder(orderId) {
+            if (confirm('Ви впевнені, що хочете видалити це замовлення? Цю дію неможливо скасувати.')) {
+                let orders = JSON.parse(localStorage.getItem('pavasOrders')) || [];
+                orders = orders.filter(order => order.id != orderId);
+                localStorage.setItem('pavasOrders', JSON.stringify(orders));
+                
+                // Оновлюємо лічильник
+                updateTotalCounter();
+                
+                // Оновлюємо список замовлень
+                loadOrders();
+                
+                alert('Замовлення успішно видалено!');
+            }
+        }
+        
+        // Завантаження та відображення завдань
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('pavasTasks')) || [];
+            const tasksList = document.getElementById('tasksList');
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<div class="no-orders">Немає завдань</div>';
+                return;
+            }
+            
+            // Сортуємо завдання за датою (найновіші спочатку)
+            tasks.sort((a, b) => b.id - a.id);
+            
+            let html = '';
+            tasks.forEach(task => {
+                const statusClass = `status-${task.status.replace(' ', '-')}`;
+                let taskClass = 'task-item';
+                
+                if (task.status === 'виконано') {
+                    taskClass += ' task-completed';
+                } else if (task.status === 'в роботі') {
+                    taskClass += ' task-in-progress';
+                }
+                
+                html += `
+                    <div class="${taskClass}">
+                        <div class="task-header">
+                            📋 ${task.name} | 📅 ${task.date}
+                        </div>
+                        <div class="task-details">
+                            <strong>Опис:</strong> ${task.description}
+                        </div>
+                        <div class="task-details">
+                            <strong>Статус:</strong> <span class="order-status ${statusClass}">${task.status}</span>
+                        </div>
+                        <button class="btn-details" onclick="showTaskDetail(${task.id})">Докладніше</button>
+                        <button class="btn-delete" onclick="deleteTask(${task.id})">Видалити</button>
+                    </div>
+                `;
+            });
+            
+            tasksList.innerHTML = html;
+        }
+        
+        // Видалення завдання
+        function deleteTask(taskId) {
+            if (confirm('Ви впевнені, що хочете видалити це завдання? Цю дію неможливо скасувати.')) {
+                let tasks = JSON.parse(localStorage.getItem('pavasTasks')) || [];
+                tasks = tasks.filter(task => task.id != taskId);
+                localStorage.setItem('pavasTasks', JSON.stringify(tasks));
+                
+                // Оновлюємо список завдань
+                loadTasks();
+                
+                alert('Завдання успішно видалено!');
+            }
+        }
+        
+        // Завантаження та відображення деталей завдання
+        function loadTaskDetail(taskId) {
+            const tasks = JSON.parse(localStorage.getItem('pavasTasks')) || [];
+            const task = tasks.find(t => t.id == taskId);
+            
+            if (!task) {
+                document.getElementById('taskDetailContent').innerHTML = '<div class="no-orders">Завдання не знайдено</div>';
+                return;
+            }
+            
+            const html = `
+                <div class="task-item">
+                    <div class="task-header">
+                        📋 ${task.name} | 📅 ${task.date}
+                    </div>
+                    <div class="task-details">
+                        <strong>Опис:</strong> ${task.description}
+                    </div>
+                </div>
+                
+                <div class="detail-form">
+                    <h3>Редагування завдання</h3>
+                    <form id="updateTaskForm">
+                        <input type="hidden" id="taskId" value="${task.id}">
+                        
+                        <div class="form-group">
+                            <label for="editTaskName">Назва завдання:</label>
+                            <input type="text" id="editTaskName" value="${task.name}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editTaskDescription">Опис завдання:</label>
+                            <textarea id="editTaskDescription" required>${task.description}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editTaskStatus">Статус:</label>
+                            <select id="editTaskStatus" required>
+                                <option value="записано" ${task.status === 'записано' ? 'selected' : ''}>Записано</option>
+                                <option value="в роботі" ${task.status === 'в роботі' ? 'selected' : ''}>В роботі</option>
+                                <option value="виконано" ${task.status === 'виконано' ? 'selected' : ''}>Виконано</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn-update">Оновити завдання</button>
+                    </form>
+                </div>
+            `;
+            
+            document.getElementById('taskDetailContent').innerHTML = html;
+            
+            // Додаємо обробник для форми оновлення
+            document.getElementById('updateTaskForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateTask();
+            });
+        }
+        
+        // Оновлення завдання
+        function updateTask() {
+            const taskId = document.getElementById('taskId').value;
+            const name = document.getElementById('editTaskName').value;
+            const description = document.getElementById('editTaskDescription').value;
+            const status = document.getElementById('editTaskStatus').value;
+            
+            let tasks = JSON.parse(localStorage.getItem('pavasTasks')) || [];
+            const taskIndex = tasks.findIndex(t => t.id == taskId);
+            
+            if (taskIndex !== -1) {
+                tasks[taskIndex].name = name;
+                tasks[taskIndex].description = description;
+                tasks[taskIndex].status = status;
+                tasks[taskIndex].updatedDate = new Date().toLocaleString('uk-UA');
+                
+                localStorage.setItem('pavasTasks', JSON.stringify(tasks));
+                
+                // Показуємо повідомлення про успіх
+                alert('Завдання успішно оновлено!');
+                
+                // Перезавантажуємо деталі
+                loadTaskDetail(taskId);
+            }
+        }
+    </script>
+</body>
+</html>
